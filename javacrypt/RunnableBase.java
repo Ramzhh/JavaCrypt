@@ -1,198 +1,136 @@
+/*
+ * File: RunnableBase.java
+ * Package: javacrypt
+ * Author: Liffecs
+ * Created: 10.06.2018
+ * Modified: 16.07.2023
+ * Version: 1.0.0
+ */
+
 package javacrypt;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.OutputStream;
-import java.security.Key;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.io.*;
+import java.security.*;
 import javax.crypto.Cipher;
 
 /**
- * Basisklasse fuer die anderen Run-Klassen
- *
- * @author Liffecs
+ * This abstract class serves as the base class for the other Run classes.
+ * It implements the RunnableInterface interface.
  */
 public abstract class RunnableBase implements RunnableInterface {
 
-    // fixed crypto algorithmus
+    // Fixed crypto algorithm
     public static final String CRYPTO_ALGORITHMUS = "RSA";
 
     /**
-     * Schluessellaenge
+     * Key length
      */
     public static final int KEY_LENGTH = 1024;
 
     /**
-     * internally used method
+     * Abstract method to encrypt or decrypt the given text using the provided key and cipher.
      *
-     * @param text der zu ver- oder entschluesselnde Text
-     * @param key
-     * @param cipher
-     * @return
-     * @throws Exception
+     * @param text   The text to encrypt or decrypt.
+     * @param key    The key.
+     * @param cipher The cipher.
+     * @return The encrypted or decrypted text.
+     * @throws Exception If an error occurs during encryption or decryption.
      */
-    abstract public byte[] crypt(byte[] text, Key key, Cipher cipher)
-            throws Exception;
+    abstract public byte[] crypt(byte[] text, Key key, Cipher cipher) throws Exception;
 
     /**
-     * RSA kann nicht mit beliebigen Puffer- groessen umgehen. Deshalb muessen
-     * die abgeleiteten Klassen diese Werte richtig zurueckliefern:
+     * Returns the buffer size used for RSA encryption or decryption.
      *
-     * RSA encryption data size limitations are slightly less than the key
-     * modulus size, depending on the actual padding scheme used (e.g. with 1024
-     * bit (128 byte) RSA key, the size limit is 117 bytes for PKCS#1 v 1.5
-     * padding. (http://www.jensign.com/JavaScience/dotnet/RSAEncrypt/)
-     *
-     * @return Puffergroesse
+     * @return The buffer size.
      */
     abstract public int getCryptoBufSize();
 
     /**
-     * Holt die Cipher des Schlüssels
+     * Returns the cipher for the given key.
      *
-     * @param key key
-     * @return
+     * @param key The key.
+     * @return The cipher.
      */
     abstract protected Cipher getCipher(Key key);
 
     /**
-     * Diese Datei holt das Schluesselobjekt aus der ersten Datei
+     * Reads the key object from the given key file.
      *
-     * @param keyFile
-     * @return
+     * @param keyFile The key file.
+     * @return The key object.
+     * @throws IOException            If an I/O error occurs.
+     * @throws ClassNotFoundException If the class of the serialized object cannot be found.
      */
-    protected Object getKeyObjectFromFile(File keyFile) {
-        Object keyObject = null;
-        ObjectInputStream ois = null;
-        // Serialisiere den privaten Schluessel
-        try {
-            // create an ObjectInputStream for the file we created before
-            ois = new ObjectInputStream(new FileInputStream(keyFile));
-
-            // read and print what we wrote before
-            keyObject = ois.readObject();
-
-            ois.close();
-            ois = null;
-        } catch (IOException | ClassNotFoundException ex) {
-            System.out.println("Exception in getKeyObjectFromFile(): "
-                    + ex.getMessage());
-            System.exit(2);
-        } finally {
-            if (ois != null) {
-                try {
-                    ois.close();
-                } catch (IOException eio) {
-                    System.err.println(
-                            "ObjectInputStream laesst sich nicht schliessen: "
-                            + eio.getMessage());
-                }
-            }
+    protected Object getKeyObjectFromFile(File keyFile) throws IOException, ClassNotFoundException {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(keyFile))) {
+            return ois.readObject();
         }
-
-        return keyObject;
     }
 
-    protected void dumpKey(PublicKey pub) {
-        System.out.println("Public  Key: "
-                + getHexString(pub.getEncoded()));
-    }
-
-    protected void dumpKey(PrivateKey priv) {
-        System.out.println("Private Key: "
-                + getHexString(priv.getEncoded()));
-    }
-
-    protected String getHexString(byte[] b) {
-        String result = "";
-        for (int i = 0; i < b.length; i++) {
-            result += Integer.toString((b[i] & 0xff) + 0x100, 16)
-                    .substring(1);
-        }
-        return result;
-    }
-
-    // ============================================================
     /**
-     * Encrypt and Decrypt files using 1024 RSA encryption
+     * Dumps the hexadecimal representation of a public key.
      *
-     * @param key The key. For encryption this is the Private Key and for
-     * decryption this is the public key
-     * @param srcFile Quelldatei
-     * @param dstFile Zieldatei
-     * @return Zahl der uebertragenen Bytes
-     * @throws Exception
+     * @param pub The public key.
      */
-    public int encryptDecryptFile(Key key, File srcFile, File dstFile)
-            throws Exception {
-        OutputStream outputWriter = null;
-        InputStream inputReader = null;
+    protected void dumpKey(PublicKey pub) {
+        System.out.println("Public Key: " + getHexString(pub.getEncoded()));
+    }
+
+    /**
+     * Dumps the hexadecimal representation of a private key.
+     *
+     * @param priv The private key.
+     */
+    protected void dumpKey(PrivateKey priv) {
+        System.out.println("Private Key: " + getHexString(priv.getEncoded()));
+    }
+
+    /**
+     * Converts a byte array to a hexadecimal string representation.
+     *
+     * @param b The byte array.
+     * @return The hexadecimal string representation.
+     */
+    protected String getHexString(byte[] b) {
+        StringBuilder result = new StringBuilder();
+        for (byte value : b) {
+            result.append(String.format("%02X", value));
+        }
+        return result.toString();
+    }
+
+    /**
+     * Encrypts or decrypts the source file using the provided key and writes the result to the destination file.
+     *
+     * @param key     The key. For encryption, this is the private key, and for decryption, this is the public key.
+     * @param srcFile The source file.
+     * @param dstFile The destination file.
+     * @return The number of bytes transferred.
+     * @throws Exception If an error occurs during encryption or decryption.
+     */
+    public int encryptDecryptFile(Key key, File srcFile, File dstFile) throws Exception {
         int size = 0;
 
         boolean isCopy = (key == null);
-        // boolean isEncrypt = (!isCopy && key instanceof PublicKey);
 
-        @SuppressWarnings("UnusedAssignment")
-        Cipher cipher = null;
-        try {
+        Cipher cipher = getCipher(key);
+        int maxBufSize = getCryptoBufSize();
+        byte[] buf = new byte[maxBufSize];
 
-            cipher = getCipher(key);
-
-            String textLine = null;
-
-            int maxBufSize = getCryptoBufSize();
-            byte[] buf = new byte[maxBufSize];
+        try (InputStream inputReader = new FileInputStream(srcFile);
+             OutputStream outputWriter = new FileOutputStream(dstFile)) {
 
             int bufl;
-            /*
-            if (!isCopy) {
-                // init the Cipher object for Encryption...
-                cipher.init((isEncrypt)
-                        ? Cipher.ENCRYPT_MODE : Cipher.DECRYPT_MODE,
-                        key);
-            }
-             */
 
-            // start FileIO
-            outputWriter = new FileOutputStream(dstFile);
-            inputReader = new FileInputStream(srcFile);
-
-            // Kopierschleife
             while ((bufl = inputReader.read(buf)) != -1) {
-                byte[] encText = null;
-                encText = crypt(MyUtils.copyBytes(buf, bufl), key, cipher);
+                byte[] encText = crypt(buf, key, cipher);
                 outputWriter.write(encText);
-                if (bufl > 0) {
-                    size += bufl;
-                }
-                // System.out.println("encText = " + new String(encText));
+                size += bufl;
             }
 
-            // if (!isCopy) { outputWriter.write(cipher.doFinal()); }
             outputWriter.flush();
-
-        } catch (Exception e) {
-            System.err.println("Exception: " + e.getMessage());
-            throw e;
-        } finally {
-            try {
-                if (outputWriter != null) {
-                    outputWriter.close();
-                }
-                if (inputReader != null) {
-                    inputReader.close();
-                }
-            } catch (Exception e) {
-                e.printStackTrace(System.err);
-            } // end of inner try, catch (Exception)...
         }
+
         return size;
     }
-
-    // ============================================================
 }

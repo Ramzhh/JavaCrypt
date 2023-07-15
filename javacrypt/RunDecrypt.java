@@ -1,142 +1,134 @@
+/*
+ * File: RunDecrypt.java
+ * Package: javacrypt
+ * Author: Liffecs
+ * Created: 10.06.2018
+ * Modified: 16.07.2023
+ * Version: 1.0.0
+ */
+
 package javacrypt;
 
-import java.util.Vector;
+import java.util.List;
 import java.io.File;
-import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 
 /**
- * RSA-Entschluesselung
+ * This class represents the RunDecrypt command, which performs RSA decryption using the private key.
+ * It extends the RunnableBase class.
  *
- * @author Liffecs
+ * Command-line arguments:
+ * [privkeyfile] [ifile] [ofile]: Decrypts the input file using the private key and saves the result to the output file.
  */
 public class RunDecrypt extends RunnableBase {
 
-    // Input-Dateiname, wenn er nicht per Kommandozeile angegeben wird
-    public static String DEFAULT_KEY_FILE = "priv.key";
+    // Default private key file name if not specified through the command line
+    public static final String DEFAULT_KEY_FILE = "priv.key";
 
-    // Input-Dateiname, wenn er nicht per Kommandozeile angegeben wird
-    public static String DEFAULT_IFILE = "decrypt_inp.dat";
+    // Default input file name if not specified through the command line
+    public static final String DEFAULT_IFILE = "decrypt_inp.dat";
 
-    // Output-Dateiname, wenn er nicht per Kommandozeile angegeben wird
-    public static String DEFAULT_OFILE = "decrypt_outp.dat";
+    // Default output file name if not specified through the command line
+    public static final String DEFAULT_OFILE = "decrypt_outp.dat";
 
-    // Groesse des Crypto-Puffers
+    // Size of the crypto buffer
     public static final int RSA_DECRYPT_BUFSIZE = 128;
 
     /**
-     * Constructor
-     */
-    public RunDecrypt() {
-    }
-
-    /**
-     * Diese Methode liefert den Wert der Groesse des Cryptobuffers zurueck
+     * Returns the size of the crypto buffer.
      *
-     * @return Puffergroesse
+     * @return The buffer size.
      */
     public int getCryptoBufSize() {
         return RSA_DECRYPT_BUFSIZE;
     }
 
     /**
-     * Entschluesselung mit dem privaten Schluessel
+     * Decrypts the given text using the provided private key and cipher.
      *
-     * @param text verschluesselte Bytes
-     * @param key  The private key
-     * @return entschluesselte Bytes
-     * @throws java.lang.Exception
+     * @param text   The encrypted bytes.
+     * @param key    The private key.
+     * @param cipher The cipher.
+     * @return The decrypted bytes.
+     * @throws Exception If an error occurs during decryption.
      */
-    public byte[] crypt(byte[] text, Key key, Cipher cipher)
-            throws Exception {
-        byte[] dectyptedText = null;
+    public byte[] crypt(byte[] text, Key key, Cipher cipher) throws Exception {
+        byte[] decryptedText = null;
         try {
             cipher.init(Cipher.DECRYPT_MODE, (PrivateKey) key);
-            dectyptedText = cipher.doFinal(text);
+            decryptedText = cipher.doFinal(text);
         } catch (Exception e) {
             System.err.println("Exception: " + e.getMessage());
-            ;
             throw e;
         }
-        return dectyptedText;
-
+        return decryptedText;
     }
 
     /**
-     * get cipher
+     * Executes the RunDecrypt command.
      *
-     * @return cipher
+     * @param args The command-line arguments.
+     */
+    @Override
+    public void run(List<String> args) {
+        int size = 0;
+        System.out.println("RunDecrypt");
+
+        // Input file
+        File privateKeyFile = null;
+
+        // Input file
+        File inputFile = null;
+
+        // Output file
+        File outputFile = null;
+
+        if (!args.isEmpty()) {
+            privateKeyFile = new File(args.get(0));
+        } else {
+            privateKeyFile = new File(DEFAULT_KEY_FILE);
+        }
+
+        if (args.size() > 1) {
+            inputFile = new File(args.get(1));
+        } else {
+            inputFile = new File(DEFAULT_IFILE);
+        }
+
+        if (args.size() > 2) {
+            outputFile = new File(args.get(2));
+        } else {
+            outputFile = new File(DEFAULT_OFILE);
+        }
+
+        try {
+            PrivateKey privateKey = (PrivateKey) getKeyObjectFromFile(privateKeyFile);
+            size = encryptDecryptFile(privateKey, inputFile, outputFile);
+        } catch (Exception ex) {
+            System.err.println("EXCEPTION: run : " + ex.getMessage());
+        }
+
+        System.out.println("Number of bytes transferred: " + size);
+    }
+
+    /**
+     * Returns the cipher for decryption.
+     *
+     * @param key The private key.
+     * @return The cipher for decryption.
      */
     @Override
     protected Cipher getCipher(Key key) {
         Cipher cipher = null;
         try {
             PrivateKey privKey = (PrivateKey) key;
-
-            // DEBUG: super.dumpKey(privKey);
-            // -------------------------------------------------
             cipher = Cipher.getInstance(CRYPTO_ALGORITHMUS);
             cipher.init(Cipher.DECRYPT_MODE, privKey);
-        } catch (NoSuchAlgorithmException ex) {
-            System.err.println("NoSuchAlgorithmException: " + ex.getMessage());
-            System.exit(8);
-        } catch (NoSuchPaddingException ex) {
-            System.err.println("NoSuchPaddingException: " + ex.getMessage());
-            System.exit(8);
-        } catch (InvalidKeyException ex) {
-            System.err.println("InvalidKeyException: " + ex.getMessage());
-            System.exit(8);
+        } catch (Exception ex) {
+            System.err.println("EXCEPTION: getCipher : " + ex.getMessage());
         }
         return cipher;
     }
-
-    /**
-     * run method
-     */
-    @Override
-    public void run(Vector<String> args) {
-        int size = 0;
-        System.out.println("RunDecrypt");
-
-        // 1. Erste Datei
-        File file1 = null;
-
-        // 2. Erste Datei
-        File file2 = null;
-
-        // 3. Erste Datei
-        File file3 = null;
-
-        if (args.size() > 0) {
-            file1 = new File(args.get(0));
-        } else {
-            file1 = new File(DEFAULT_KEY_FILE);
-        }
-
-        if (args.size() > 1) {
-            file2 = new File(args.get(1));
-        } else {
-            file2 = new File(DEFAULT_IFILE);
-        }
-
-        if (args.size() > 2) {
-            file3 = new File(args.get(2));
-        } else {
-            file3 = new File(DEFAULT_OFILE);
-        }
-
-        try {
-            PrivateKey privKey = (PrivateKey) getKeyObjectFromFile(file1);
-            size = encryptDecryptFile(privKey, file2, file3);
-        } catch (Exception ex) {
-            System.err.println("EXCEPTION: run : " + ex.getMessage());
-        }
-
-        System.out.println("Anzahl der uebertragenen Bytes=" + size);
-    }
-
 }

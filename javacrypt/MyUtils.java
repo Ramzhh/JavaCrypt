@@ -1,64 +1,64 @@
+/*
+ * File: MyUtils.java
+ * Package: javacrypt
+ * Author: Liffecs
+ * Created: 10.06.2018
+ * Modified: 16.07.2023
+ * Version: 1.0.0
+ */
+
 package javacrypt;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
- * Klasse fuer verschiedene Hilfsmethoden
+ * Utility class for various helper methods.
+ *
+ * This class provides various utility methods for the MyCrypt program.
  *
  * @author Liffecs
  */
 public class MyUtils {
 
     /**
-     * Intern verwendete Hilfsmethode
+     * Copies a specified number of bytes from a byte array.
      *
-     * @param arr    zu kopierende Bytes
-     * @param length Anzahl der zu kopierenden Bytes
-     * @return kopierte Bytes
+     * @param arr    The byte array to be copied.
+     * @param length The number of bytes to be copied.
+     * @return A new byte array containing the copied bytes.
      */
     public static byte[] copyBytes(byte[] arr, int length) {
-        byte[] newArr = null;
         if (arr.length == length) {
-            newArr = arr;
+            return arr.clone();
         } else {
-            newArr = new byte[length];
-            for (int i = 0; i < length; i++) {
-                newArr[i] = (byte) arr[i];
-            }
+            byte[] newArr = new byte[length];
+            System.arraycopy(arr, 0, newArr, 0, length);
+            return newArr;
         }
-        return newArr;
     }
 
     /**
-     * Shift-Operation aehnlich wie bei der Shell
+     * Shell-like shift operation.
+     * Shifts the arguments to the left by one position and returns the resulting list.
      *
-     * @param argsSrc bisherige Argumentenliste
-     * @param maxArgs Begrenzung auf die maximale Zahl von Argumenten
-     * @return neue Argumentliste
+     * @param argsSrc The original list of arguments.
+     * @param maxArgs The maximum number of arguments to be considered.
+     * @return A new list of shifted arguments.
      */
-    public static Vector<String> shiftArgs(Vector<String> argsSrc, int maxArgs) {
-        Vector<String> argsDst = new Vector<>();
-        // Holen der uebrigen Argumente
-        for (int i = 1; (i < argsSrc.size()) && (i < maxArgs); ++i) {
-            argsDst.add(argsSrc.get(i));
-        }
-        return argsDst;
+    public static List<String> shiftArgs(List<String> argsSrc, int maxArgs) {
+        return argsSrc.subList(1, Math.min(argsSrc.size(), maxArgs));
     }
 
     /**
-     * Shift-Operation aehnlich wie bei der Shell
+     * Shell-like shift operation.
+     * Shifts the arguments to the left by one position and returns the resulting list.
      *
-     * @param argsSrc bisherige Argumentenliste
-     * @param maxArgs Begrenzung auf die maximale Zahl von Argumenten
-     * @return neue Argumentliste
+     * @param argsSrc The original array of arguments.
+     * @param maxArgs The maximum number of arguments to be considered.
+     * @return A new list of shifted arguments.
      */
-    public static Vector<String> shiftArgs(String[] argsSrc, int maxArgs) {
-        Vector<String> argsDst = new Vector<>();
-        // Holen der uebrigen Argumente
-        for (int i = 1; (i < argsSrc.length) && (i < maxArgs); ++i) {
-            argsDst.add(argsSrc[i]);
-        }
-        return argsDst;
+    public static List<String> shiftArgs(String[] argsSrc, int maxArgs) {
+        return List.of(argsSrc).subList(1, Math.min(argsSrc.length, maxArgs));
     }
 
 }

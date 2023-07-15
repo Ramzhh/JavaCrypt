@@ -1,6 +1,16 @@
+/*
+ * File: MyCryptMain.java
+ * Package: javacrypt
+ * Author: Liffecs
+ * Created: 10.06.2018
+ * Modified: 16.07.2023
+ * Version: 1.0.0
+ */
+
 package javacrypt;
 
-import java.util.Vector;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The main class for the MyCrypt program.
@@ -15,37 +25,32 @@ import java.util.Vector;
  */
 public class MyCryptMain {
 
-    // Name of the program as a string
-    static final String PROG_NAME = "MyCryptMain";
-
-    static final String SCOPE = "jexample.";
+    private static final String PROG_NAME = "MyCryptMain";
 
     // Mapping of command and class
-    public static final String[][] MY_ARRAY = {
-        {"-genkeys", SCOPE + "RunGenKeys"},
-        {"-encrypt", SCOPE + "RunEncrypt"},
-        {"-decrypt", SCOPE + "RunDecrypt"},
-        {"-copy", SCOPE + "RunCopy"}
-    };
+    private static final List<String[]> MY_ARRAY = List.of(
+        new String[]{"-genkeys", "jexample.RunGenKeys"},
+        new String[]{"-encrypt", "jexample.RunEncrypt"},
+        new String[]{"-decrypt", "jexample.RunDecrypt"},
+        new String[]{"-copy", "jexample.RunCopy"}
+    );
 
     /**
      * Displays the usage of the program and exits.
      */
-    public static void usage() {
-        String msg[] = {
+    private static void usage() {
+        String[] msg = {
             "Program '" + PROG_NAME + "'",
             "Usage:",
-            "\t" + PROG_NAME + " " + MY_ARRAY[0][0] + " [priv_keyfile] [pub_keyfile]",
-            "\t" + PROG_NAME + " " + MY_ARRAY[1][0] + " [pub_keyfile] [ifile] [ofile] ",
-            "\t" + PROG_NAME + " " + MY_ARRAY[2][0] + " [privkeyfile] [ifile] [ofile] ",
-            "\t" + PROG_NAME + " " + MY_ARRAY[3][0] + " [dummyword] [ifile]  [ofile] ",
+            "\t" + PROG_NAME + " " + MY_ARRAY.get(0)[0] + " [priv_keyfile] [pub_keyfile]",
+            "\t" + PROG_NAME + " " + MY_ARRAY.get(1)[0] + " [pub_keyfile] [ifile] [ofile] ",
+            "\t" + PROG_NAME + " " + MY_ARRAY.get(2)[0] + " [privkeyfile] [ifile] [ofile] ",
+            "\t" + PROG_NAME + " " + MY_ARRAY.get(3)[0] + " [dummyword] [ifile]  [ofile] ",
             ""
         };
 
         // Output the strings
-        for (int i = 0; i < msg.length; ++i) {
-            System.err.println(msg[i]);
-        }
+        Arrays.stream(msg).forEach(System.err::println);
 
         // Exit the program with an error code
         System.exit(0);
@@ -53,13 +58,13 @@ public class MyCryptMain {
 
     /**
      * Entry point of the main program.
+     *
      * @param args The command-line arguments.
      * @throws Exception If an error occurs.
      */
     public static void main(String[] args) throws Exception {
-
         // Factory instance
-        RunnableKeyValueFactory runnableKeyValueFactory = new RunnableKeyValueFactory(MY_ARRAY);
+        RunnableKeyValueFactory runnableKeyValueFactory = new RunnableKeyValueFactory(MY_ARRAY.toArray(new String[0][]));
 
         // Get the number of command-line arguments
         int argSize = args.length;
@@ -69,7 +74,7 @@ public class MyCryptMain {
         }
 
         // Get the control argument
-        String cmdKey = new String(args[0]);
+        String cmdKey = args[0];
 
         // Check if the command exists
         if (!runnableKeyValueFactory.containsKey(cmdKey)) {
@@ -77,13 +82,13 @@ public class MyCryptMain {
         }
 
         // Perform the shift operation
-        Vector<String> optArgVector = MyUtils.shiftArgs(args, 5);
+        List<String> optArgList = List.of(args).subList(1, args.length);
 
         // Instantiation using the factory method:
         RunnableInterface myRun = runnableKeyValueFactory.getInstanceFromKey(cmdKey);
 
         // Call the run method
-        myRun.run(optArgVector);
+        myRun.run(optArgList);
 
         System.out.println("End of the program.");
     }

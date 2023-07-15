@@ -1,3 +1,12 @@
+/*
+ * File: RunEncrypt.java
+ * Package: javacrypt
+ * Author: Liffecs
+ * Created: 10.06.2018
+ * Modified: 16.07.2023
+ * Version: 1.0.0
+ */
+
 package javacrypt;
 
 import java.io.File;
@@ -5,142 +14,154 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.util.Vector;
+import java.util.List;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
+import java.nio.file.Files;
 
 /**
- * RSA Verschluesselung
+ * This class represents the RunEncrypt command, which performs RSA encryption using the public key.
+ * It extends the RunnableBase class.
  *
- * @author Liffecs
+ * Command-line arguments:
+ * [pubkeyfile] [ifile] [ofile]: Encrypts the input file using the public key and saves the result to the output file.
  */
 public class RunEncrypt extends RunnableBase {
 
-    // Input-Dateiname, wenn er nicht per Kommandozeile angegeben wird
+    // Default public key file name if not specified through the command line
     public static final String DEFAULT_KEY_FILE = "pub.key";
 
-    // Input-Dateiname, wenn er nicht per Kommandozeile angegeben wird
+    // Default input file name if not specified through the command line
     public static final String DEFAULT_IFILE = "encr_inp.dat";
 
-    // Output-Dateiname, wenn er nicht per Kommandozeile angegeben wird
+    // Default output file name if not specified through the command line
     public static final String DEFAULT_OFILE = "encr_outp.dat";
 
-    // Groesse des Crypto-Puffers
+    // Size of the crypto buffer
     public static final int RSA_ENCRYPT_BUFSIZE = 100;
 
     /**
-     * public constructor
+     * Constructor
      */
     public RunEncrypt() {
     }
 
     /**
-     * Diese Methode liefert den Wert der Groesse des Cryptobuffers zurueck
+     * Returns the size of the crypto buffer.
      *
-     * @return Puffergroesse
+     * @return The buffer size.
      */
     public int getCryptoBufSize() {
         return RSA_ENCRYPT_BUFSIZE;
     }
 
     /**
-     * Encrypt a text using public key.
+     * Encrypts the given text using the provided public key and cipher.
      *
-     * @param text The original unencrypted text
-     * @param key The public key
-     * @return Encrypted text
-     * @throws java.lang.Exception
+     * @param text   The original unencrypted text.
+     * @param key    The public key.
+     * @param cipher The cipher.
+     * @return The encrypted text.
+     * @throws Exception If an error occurs during encryption.
      */
-    public byte[] crypt(byte[] text, Key key, Cipher cipher)
-            throws Exception {
-        byte[] cipherText = null;
+    public byte[] crypt(byte[] text, Key key, Cipher cipher) throws Exception {
         try {
-            // Cipher cipher = Cipher.getInstance(CRYPTO_ALGORITHMUS);
-
-            // encrypt the plaintext using the public key
             cipher.init(Cipher.ENCRYPT_MODE, (PublicKey) key);
-            cipherText = cipher.doFinal(text);
+            return cipher.doFinal(text);
         } catch (Exception e) {
             System.out.println("Exception: " + e.getMessage());
             throw e;
         }
-        return cipherText;
     }
 
     /**
-     * get cipher
+     * Returns the cipher for encryption.
      *
-     * @return cipher
+     * @param key The public key.
+     * @return The cipher for encryption.
      */
     @Override
     protected Cipher getCipher(Key key) {
-        Cipher cipher = null;
         try {
             PublicKey pubKey = (PublicKey) key;
-
-            // super.dumpKey(pubKey);
-            // -------------------------------------------------
-            cipher = Cipher.getInstance(CRYPTO_ALGORITHMUS);
+            Cipher cipher = Cipher.getInstance(CRYPTO_ALGORITHMUS);
             cipher.init(Cipher.ENCRYPT_MODE, pubKey);
-        } catch (NoSuchAlgorithmException ex) {
-            System.err.println("NoSuchAlgorithmException: " + ex.getMessage());
+            return cipher;
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException ex) {
+            System.err.println("Exception: " + ex.getMessage());
             System.exit(8);
-        } catch (NoSuchPaddingException ex) {
-            System.err.println("NoSuchPaddingException: " + ex.getMessage());
-            System.exit(8);
-        } catch (InvalidKeyException ex) {
-            System.err.println("InvalidKeyException: " + ex.getMessage());
-            System.exit(8);
+            return null; // Unreachable code, added to satisfy the compiler
         }
-        return cipher;
     }
 
     /**
-     * run method
+     * Executes the RunEncrypt command.
+     *
+     * @param args The command-line arguments.
      */
     @Override
-    public void run(Vector<String> args) {
-        // TODO
+    public void run(List<String> args) {
         System.out.println("RunEncrypt");
+
         int size = 0;
 
-        // 1. Erste Datei
-        File file1 = null;
+        // Input file
+        File publicKeyFile = null;
 
-        // 2. Erste Datei
-        File file2 = null;
+        // Input file
+        File inputFile = null;
 
-        // 3. Erste Datei
-        File file3 = null;
+        // Output file
+        File outputFile = null;
 
-        if (args.size() > 0) {
-            file1 = new File(args.get(0));
+        if (!args.isEmpty()) {
+            publicKeyFile = new File(args.get(0));
         } else {
-            file1 = new File(DEFAULT_KEY_FILE);
+            publicKeyFile = new File(DEFAULT_KEY_FILE);
         }
 
         if (args.size() > 1) {
-            file2 = new File(args.get(1));
+            inputFile = new File(args.get(1));
         } else {
-            file2 = new File(DEFAULT_IFILE);
+            inputFile = new File(DEFAULT_IFILE);
         }
 
         if (args.size() > 2) {
-            file3 = new File(args.get(2));
+            outputFile = new File(args.get(2));
         } else {
-            file3 = new File(DEFAULT_OFILE);
+            outputFile = new File(DEFAULT_OFILE);
         }
 
-        @SuppressWarnings("UnusedAssignment")
         PublicKey pubKey = null;
         try {
-            pubKey = (PublicKey) getKeyObjectFromFile(file1);
-            size = encryptDecryptFile(pubKey, file2, file3);
+            pubKey = (PublicKey) getKeyObjectFromFile(publicKeyFile);
+            size = encryptDecryptFile(pubKey, inputFile, outputFile);
         } catch (Exception ex) {
             System.err.println("EXCEPTION: run : " + ex.getMessage());
         }
 
-        System.out.println("Anzahl der uebertragenen Bytes=" + size);
+        System.out.println("Number of bytes transferred: " + size);
     }
 
+    /**
+     * Encrypts the input file using the public key and saves the result to the output file.
+     *
+     * @param publicKey The public key.
+     * @param inputFile The input file.
+     * @param outputFile The output file.
+     * @return The number of bytes transferred.
+     * @throws Exception If an error occurs during encryption.
+     */
+    private int encryptDecryptFile(PublicKey publicKey, File inputFile, File outputFile) throws Exception {
+        try {
+            Cipher cipher = getCipher(publicKey);
+            byte[] inputBytes = Files.readAllBytes(inputFile.toPath());
+            byte[] encryptedBytes = crypt(inputBytes, publicKey, cipher);
+            Files.write(outputFile.toPath(), encryptedBytes);
+            return encryptedBytes.length;
+        } catch (Exception e) {
+            System.err.println("Exception: " + e.getMessage());
+            throw e;
+        }
+    }
 }

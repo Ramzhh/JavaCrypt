@@ -1,78 +1,117 @@
+/*
+ * File: RunnableKeyValueFactory.java
+ * Package: javacrypt
+ * Author: Liffecs
+ * Created: 10.06.2018
+ * Modified: 16.07.2023
+ * Version: 1.0.0
+ */
+
 package javacrypt;
 
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
+ * A factory class that maps keywords to class names and provides methods for creating instances based on keywords.
  *
- * @author Liffecs
+ * This class extends the RunnableFactory class.
+ *
+ * Usage:
+ * - Instantiate the RunnableKeyValueFactory with a mapping list of keywords to class names.
+ * - Use the getInstanceFromKey() method to get an instance of a class based on the provided keyword.
+ * - Use the getClassNameOfKey() method to get the class name associated with a keyword.
+ * - Use the containsKey() method to check if a keyword exists in the mapping.
+ *
+ * Example usage:
+ *
+ * // Create a mapping list of keywords to class names
+ * String[][] mapping = {
+ *     {"keyword1", "com.example.Class1"},
+ *     {"keyword2", "com.example.Class2"},
+ *     {"keyword3", "com.example.Class3"}
+ * };
+ *
+ * // Instantiate the RunnableKeyValueFactory with the mapping list
+ * RunnableKeyValueFactory factory = new RunnableKeyValueFactory(mapping);
+ *
+ * // Get an instance of a class based on a keyword
+ * RunnableInterface instance = factory.getInstanceFromKey("keyword1");
+ *
+ * // Get the class name associated with a keyword
+ * String className = factory.getClassNameOfKey("keyword2");
+ *
+ * // Check if a keyword exists in the mapping
+ * boolean containsKey = factory.containsKey("keyword3");
  */
 public class RunnableKeyValueFactory extends RunnableFactory {
 
-    /**
-     * Hashtabelle zur Zuordnung von Schluesselworten zu Klassennamen
-     */
-    Hashtable key2ClassnameTabelle = null;
+    // Map for mapping keywords to class names
+    private Map<String, String> key2ClassNameMap = new HashMap<>();
 
     /**
-     * Konstruktor mit Zuordnungsliste
+     * Constructs a RunnableKeyValueFactory with a mapping list of keywords to class names.
      *
-     * @param args
+     * @param args The mapping list of keywords to class names.
      */
-    RunnableKeyValueFactory(String[][] args) {
-        // Erzeugung der Instanz;
-        key2ClassnameTabelle = new Hashtable();
+    public RunnableKeyValueFactory(String[][] args) {
+        // Instantiating the Map
+        key2ClassNameMap = new HashMap<>();
 
         if (args != null) {
-            for (int i = 0; i < args.length; ++i) {
-                String[] key2Classname = args[i];
-                String key = key2Classname[0];
-                String val = key2Classname[1];
+            // Iterating through the provided mapping list
+            for (String[] keywordToClassName : args) {
+                String keyword = keywordToClassName[0];
+                String className = keywordToClassName[1];
 
-                // Fuellen der Hashtabelle
-                key2ClassnameTabelle.put(key, val);
+                // Adding the keyword and class name to the Map
+                key2ClassNameMap.put(keyword, className);
             }
         }
     }
 
     /**
-     * Holt eine Klasses ueber den Schluessel
+     * Gets an instance of a class based on the provided keyword.
      *
-     * @param key Zuordnungsschluessel zum Klassenamen
-     * @return Instanz der Klasse
-     * @throws Exception
+     * @param keyword The keyword used to retrieve the class name.
+     * @return An instance of the class associated with the keyword, or null if not found.
+     * @throws Exception If an error occurs during instance creation.
      */
-    public RunnableInterface getInstanceFromKey(String key)
-            throws Exception {
+    public RunnableInterface getInstanceFromKey(String keyword) throws Exception {
         RunnableInterface runnableInterface = null;
-        String className = getClassNameOfKey(key);
+
+        // Getting the class name associated with the keyword
+        String className = getClassNameOfKey(keyword);
         if (className != null) {
+            // Instantiating a class based on the class name
             runnableInterface = getInstance(className);
         }
         return runnableInterface;
     }
 
     /**
-     * Holt den fuer den Schluessel hinterlegten Namen der Klasse
+     * Gets the class name associated with the provided keyword.
      *
-     * @param key Schluessel
-     * @return Name der Klasse (oder Null)
+     * @param keyword The keyword for which to retrieve the class name.
+     * @return The class name associated with the keyword, or null if not found.
      */
-    public String getClassNameOfKey(String key) {
-        String className = null;
-        if (containsKey(key)) {
-            className = (String) key2ClassnameTabelle.get(key);
+    public String getClassNameOfKey(String keyword) {
+        // Checking if the keyword exists in the Map
+        if (containsKey(keyword)) {
+            // Retrieving the class name for the keyword from the Map
+            return key2ClassNameMap.get(keyword);
         }
-        return className;
+        return null;
     }
 
     /**
-     * Hier wird die Existenz eines Schuessels geprueft.
+     * Checks if the provided keyword exists in the mapping.
      *
-     * @param key Schluessel
-     * @return
+     * @param keyword The keyword to check.
+     * @return True if the keyword exists in the mapping, false otherwise.
      */
-    public boolean containsKey(String key) {
-        return (key == null)
-                ? false : key2ClassnameTabelle.containsKey(key);
+    public boolean containsKey(String keyword) {
+        // Checking if the keyword exists in the Map
+        return keyword != null && key2ClassNameMap.containsKey(keyword);
     }
 }
