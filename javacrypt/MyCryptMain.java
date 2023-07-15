@@ -3,86 +3,88 @@ package javacrypt;
 import java.util.Vector;
 
 /**
- * Main-Klasse
+ * The main class for the MyCrypt program.
+ * This class serves as the entry point and controls the execution of various cryptography functions.
+ * The program supports key pair generation, encryption, decryption, and file copying.
  *
- * @author Liffecs
+ * Command-line arguments:
+ * -genkeys [priv_keyfile] [pub_keyfile]: Generates a key pair and stores it in the specified files.
+ * -encrypt [pub_keyfile] [ifile] [ofile]: Encrypts the input file using the public key and saves the result to the output file.
+ * -decrypt [privkeyfile] [ifile] [ofile]: Decrypts the input file using the private key and saves the result to the output file.
+ * -copy [dummyword] [ifile] [ofile]: Copies the input file to the output file (without encryption).
  */
 public class MyCryptMain {
 
-    // namer des Programms als string
+    // Name of the program as a string
     static final String PROG_NAME = "MyCryptMain";
 
     static final String SCOPE = "jexample.";
 
-    // Zuordnungsliste von Kommando und Klasse
-    public static final String[][] MY_ARRAY
-            = {
-            {"-genkeys", SCOPE + "RunGenKeys"},
-            {"-encrypt", SCOPE + "RunEncrypt"},
-            {"-decrypt", SCOPE + "RunDecrypt"},
-            {"-copy", SCOPE + "RunCopy"}
+    // Mapping of command and class
+    public static final String[][] MY_ARRAY = {
+        {"-genkeys", SCOPE + "RunGenKeys"},
+        {"-encrypt", SCOPE + "RunEncrypt"},
+        {"-decrypt", SCOPE + "RunDecrypt"},
+        {"-copy", SCOPE + "RunCopy"}
     };
 
-    // Anzeige des Hinweistextes und Abbruch
+    /**
+     * Displays the usage of the program and exits.
+     */
     public static void usage() {
         String msg[] = {
-                "Program '" + PROG_NAME + "'",
-                "usage:",
-                "\t" + PROG_NAME + " " + MY_ARRAY[0][0]
-                        + " [priv_keyfile] [pub_keyfile]",
-                "\t" + PROG_NAME + " " + MY_ARRAY[1][0]
-                        + " [pub_keyfile] [ifile] [ofile] ",
-                "\t" + PROG_NAME + " " + MY_ARRAY[2][0]
-                        + " [privkeyfile] [ifile] [ofile] ",
-                "\t" + PROG_NAME + " " + MY_ARRAY[3][0]
-                        + " [dummyword] [ifile]  [ofile] ",
-                ""
+            "Program '" + PROG_NAME + "'",
+            "Usage:",
+            "\t" + PROG_NAME + " " + MY_ARRAY[0][0] + " [priv_keyfile] [pub_keyfile]",
+            "\t" + PROG_NAME + " " + MY_ARRAY[1][0] + " [pub_keyfile] [ifile] [ofile] ",
+            "\t" + PROG_NAME + " " + MY_ARRAY[2][0] + " [privkeyfile] [ifile] [ofile] ",
+            "\t" + PROG_NAME + " " + MY_ARRAY[3][0] + " [dummyword] [ifile]  [ofile] ",
+            ""
         };
 
-        // Ausgabe der Strings
+        // Output the strings
         for (int i = 0; i < msg.length; ++i) {
             System.err.println(msg[i]);
         }
 
-        // Beendigung des Programms mit Fehlercode
+        // Exit the program with an error code
         System.exit(0);
     }
 
-    // ==========================================================
-    // Einstieg ins Hauptprogramm
+    /**
+     * Entry point of the main program.
+     * @param args The command-line arguments.
+     * @throws Exception If an error occurs.
+     */
     public static void main(String[] args) throws Exception {
 
-        // Fabrik-Instanz
-        RunnableKeyValueFactory runnableKeyValueFactory
-                = new RunnableKeyValueFactory(MY_ARRAY);
+        // Factory instance
+        RunnableKeyValueFactory runnableKeyValueFactory = new RunnableKeyValueFactory(MY_ARRAY);
 
-        // Ermittlung der Anzahl der Kommandozeile-Argumente
+        // Get the number of command-line arguments
         int argSize = args.length;
 
         if (argSize <= 0) {
-            usage(); // static
+            usage(); // Static method
         }
 
-        // Holen des Steuerarguments
+        // Get the control argument
         String cmdKey = new String(args[0]);
 
-        // Ueberpruefung des Existenz des Kommandos
+        // Check if the command exists
         if (!runnableKeyValueFactory.containsKey(cmdKey)) {
             usage();
         }
 
-        // Ausfuehren der Shift-Operation
+        // Perform the shift operation
         Vector<String> optArgVector = MyUtils.shiftArgs(args, 5);
 
-        // Instanzierung per Fabrikmethode:
-        RunnableInterface myRun
-                = runnableKeyValueFactory
-                .getInstanceFromKey(cmdKey);
+        // Instantiation using the factory method:
+        RunnableInterface myRun = runnableKeyValueFactory.getInstanceFromKey(cmdKey);
 
-        // Aufruf der Run-Methode
+        // Call the run method
         myRun.run(optArgVector);
 
-        System.out.println("Ende des Programms.");
+        System.out.println("End of the program.");
     }
-
 }
