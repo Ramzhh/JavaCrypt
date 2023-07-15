@@ -134,6 +134,7 @@ fabric.properties
 hs_err_pid*
 
 
-# Riffecx
-*.jar
+# Liffecs
+JavaCrypt.jar
 *.dat
+*.iml

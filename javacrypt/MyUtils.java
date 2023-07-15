@@ -1,4 +1,4 @@
-package jexample;
+package javacrypt;
 
 import java.util.Vector;
 

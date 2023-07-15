@@ -1,5 +1,5 @@
 
-package jexample;
+package javacrypt;
 
 /**
  *
