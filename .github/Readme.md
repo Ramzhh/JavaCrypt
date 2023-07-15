@@ -5,7 +5,9 @@
 The first thing to do is to install java. This works differently with each operating system. Here is the instruction for Ubuntu
 ```shell
 sudo apt update -y 
-sudo apt install openjdk-16-jre-headless
+sudo apt-get install -y openjdk-18-jre 
+
+
 ```
 
 ## Build Project
