@@ -6,8 +6,6 @@ The first thing to do is to install java. This works differently with each opera
 ```shell
 sudo apt update -y 
 sudo apt-get install -y openjdk-18-jre 
-
-
 ```
 
 ## Build Project
