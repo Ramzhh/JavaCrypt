@@ -27,7 +27,7 @@ jobs:
           jar cfm JavaCrypt.jar ./javacrypt/makefile.txt javacrypt/*.class
 
       - name: Upload JavaCrypt.jar as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: JavaCrypt Jar
           path: JavaCrypt.jar
