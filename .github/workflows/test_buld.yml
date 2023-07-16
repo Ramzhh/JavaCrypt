@@ -2,7 +2,8 @@ name: Test Builds
 on:
   push:
     branches:
-      - ["main", "nightly"]
+      - main
+      - nightly
   pull_request:
     branches:
       - main
