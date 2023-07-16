@@ -1,0 +1,35 @@
+name: Build JavaCrypt
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+      - name: Build and package JavaCrypt
+        run: |
+          javac -Xlint:unchecked ./javacrypt/MyCryptMain.java
+          jar cfm JavaCrypt.jar ./javacrypt/makefile.txt javacrypt/*.class
+
+      - name: Upload JavaCrypt.jar as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: JavaCrypt Jar
+          path: JavaCrypt.jar
+
+      - name: Clean untracked files
+        run: git clean -fX
