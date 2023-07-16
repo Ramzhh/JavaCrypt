@@ -28,7 +28,7 @@ public class MyCryptMain {
     private static final String PROG_NAME = "MyCryptMain";
 
     // Mapping of command and class
-    private static final List<String[]> MY_ARRAY = List.of(
+    private static final List<String[]> MY_ARRAY = Arrays.asList(
         new String[]{"-genkeys", "jexample.RunGenKeys"},
         new String[]{"-encrypt", "jexample.RunEncrypt"},
         new String[]{"-decrypt", "jexample.RunDecrypt"},
@@ -82,7 +82,7 @@ public class MyCryptMain {
         }
 
         // Perform the shift operation
-        List<String> optArgList = List.of(args).subList(1, args.length);
+        List<String> optArgList = Arrays.asList(args).subList(1, args.length);
 
         // Instantiation using the factory method:
         RunnableInterface myRun = runnableKeyValueFactory.getInstanceFromKey(cmdKey);
