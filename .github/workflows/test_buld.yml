@@ -1,4 +1,4 @@
-name: Build JavaCrypt
+name: Test Builds
 on:
   push:
     branches:
@@ -28,6 +28,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
+          distribution: 'adopt'
 
       - name: Build and package JavaCrypt
         run: |
